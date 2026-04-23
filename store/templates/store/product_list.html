@@ -1,0 +1,63 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<div class="product-grid">
+    {% for product in products %}
+    <div class="product-card">
+        <div class="product-image">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+                <div class="no-image">📦 Нет фото</div>
+            {% endif %}
+        </div>
+        <div class="product-info">
+            <span class="product-category">{{ product.category.name }}</span>
+            <h3>
+                <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+            </h3>
+            <p class="price">{{ product.price }} ₽</p>
+            <p class="stock {% if product.stock == 0 %}out-of-stock{% endif %}">
+                {% if product.stock > 0 %}
+                    В наличии: {{ product.stock }} шт.
+                {% else %}
+                    Нет в наличии
+                {% endif %}
+            </p>
+            <div class="card-actions">
+    <a href="{{ product.get_absolute_url }}" class="btn-detail">Подробнее</a>
+    <form method="post" action="{% url 'cart:cart_add' product.id %}" class="add-to-cart-form">
+        {% csrf_token %}
+        <input type="hidden" name="quantity" value="1">
+        <input type="hidden" name="override" value="False">
+        <button type="submit" class="btn-add-to-cart">🛒 В корзину</button>
+    </form>
+    <a href="{% url 'product_edit' product.slug %}" class="btn-edit-small">✏️</a>
+</div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-message">
+        <p>😔 Товаров пока нет.</p>
+        <a href="{% url 'product_add' %}" class="btn-add-large">➕ Добавить первый товар</a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Пагинация -->
+{% if is_paginated %}
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}">← Назад</a>
+    {% endif %}
+    
+    <span class="current-page">
+        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+    </span>
+    
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Вперёд →</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

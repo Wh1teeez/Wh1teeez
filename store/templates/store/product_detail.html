@@ -1,0 +1,64 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<div class="product-detail">
+    <div class="product-detail-grid">
+        <div class="product-detail-image">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+                <div class="no-image-large">📦 Изображение отсутствует</div>
+            {% endif %}
+        </div>
+        
+        <div class="product-detail-info">
+            <div class="breadcrumbs">
+                <a href="{% url 'product_list' %}">Все товары</a> /
+                <a href="{% url 'product_list_by_category' product.category.slug %}">{{ product.category.name }}</a> /
+                <span>{{ product.name }}</span>
+            </div>
+            
+            <h1>{{ product.name }}</h1>
+            
+            <div class="product-meta">
+                <span class="category-badge">{{ product.category.name }}</span>
+                <span class="stock-badge {% if product.stock == 0 %}out{% endif %}">
+                    {% if product.stock > 0 %}
+                        В наличии: {{ product.stock }} шт.
+                    {% else %}
+                        Нет в наличии
+                    {% endif %}
+                </span>
+            </div>
+            
+            <div class="price-block">
+                <span class="price">{{ product.price }} ₽</span>
+            </div>
+            <div class="add-to-cart-section">
+    <form method="post" action="{% url 'cart:cart_add' product.id %}" class="detail-add-form">
+        {% csrf_token %}
+        <div class="quantity-selector">
+            <label for="quantity">Количество:</label>
+            <select name="quantity" id="quantity">
+                {% for i in "12345678910" %}
+                <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <input type="hidden" name="override" value="False">
+        <button type="submit" class="btn-add-to-cart-large">🛒 Добавить в корзину</button>
+    </form>
+</div>
+            <div class="description">
+                <h3>Описание</h3>
+                {{ product.description|linebreaks|default:"Описание пока не добавлено." }}
+            </div>
+            
+            <div class="detail-actions">
+                <a href="{% url 'product_edit' product.slug %}" class="btn-edit">✏️ Редактировать товар</a>
+                <a href="{% url 'product_list' %}" class="btn-back">← Назад к списку</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

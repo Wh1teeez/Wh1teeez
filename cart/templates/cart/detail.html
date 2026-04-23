@@ -1,0 +1,86 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Корзина{% endblock %}
+
+{% block content %}
+<div class="cart-container">
+    <h1>🛒 Корзина</h1>
+    
+    {% if cart|length > 0 %}
+    <div class="cart-table-wrapper">
+        <table class="cart-table">
+            <thead>
+                <tr>
+                    <th>Товар</th>
+                    <th>Цена</th>
+                    <th>Количество</th>
+                    <th>Сумма</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart %}
+                <tr>
+                    <td class="product-cell">
+                        <div class="cart-product">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="cart-image">
+                            {% else %}
+                                <div class="cart-no-image">📦</div>
+                            {% endif %}
+                            <div class="cart-product-info">
+                                <a href="{{ item.product.get_absolute_url }}" class="cart-product-name">
+                                    {{ item.product.name }}
+                                </a>
+                                <span class="cart-product-category">{{ item.product.category.name }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="price-cell">{{ item.price }} ₽</td>
+                    <td class="quantity-cell">
+                        <form method="post" class="quantity-form">
+                            {% csrf_token %}
+                            <input type="number" 
+                                   name="quantity_{{ item.product.id }}" 
+                                   value="{{ item.quantity }}" 
+                                   min="1" 
+                                   max="20"
+                                   class="quantity-input"
+                                   onchange="this.form.submit()">
+                        </form>
+                    </td>
+                    <td class="total-cell">{{ item.total_price }} ₽</td>
+                    <td class="remove-cell">
+                        <form method="post" action="{% url 'cart:cart_remove' item.product.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="remove-btn" title="Удалить">🗑️</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="cart-summary">
+        <div class="cart-total">
+            <span>Итого:</span>
+            <strong>{{ cart.get_total_price }} ₽</strong>
+        </div>
+        <div class="cart-actions">
+            <a href="{% url 'product_list' %}" class="btn-continue">← Продолжить покупки</a>
+            <a href="#" class="btn-checkout">✅ Оформить заказ</a>
+            <a href="{% url 'cart:cart_clear' %}" class="btn-clear" onclick="return confirm('Очистить корзину?')">
+                🗑️ Очистить корзину
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-cart">
+        <p>🛒 Ваша корзина пуста</p>
+        <a href="{% url 'product_list' %}" class="btn-start-shopping">🛍️ Начать покупки</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
